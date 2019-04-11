@@ -2,7 +2,12 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
+import json
 import os
+from azure.cognitiveservices.search.imagesearch import ImageSearchAPI
+from azure.cognitiveservices.search.websearch import WebSearchAPI
+from azure.cognitiveservices.search.websearch.models import SafeSearch
+from msrest.authentication import CognitiveServicesCredentials
 
 
 app = Flask(__name__)
@@ -32,9 +37,27 @@ def add_event():
                 total=total,
                 date=date
             )
-            db.session.add(highscore)
-            db.session.commit()
-            payload = {'highscore_id': highscore.id}
+            subscription_key = "a4c5ea3ef0fa4ab38a4d0cd61cb2f41e"
+            search_term = name
+            client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
+            client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
+            web_data = client.web.search(query=name)
+            image_results = client2.images.search(query=search_term)
+            class Object:
+                def toJSON(self):
+                    return json.dumps(self, default=lambda o: o.__dict__, 
+                        sort_keys=True, indent=4)
+            res = Object()
+            res.image = image_results.value
+            res.data = web_data
+            # db.session.add(highscore)
+            # db.session.commit()
+            x = res.data.additional_properties['entities']['value'][0]['description']
+            if ("nba" in x.lower()) or ("national basketball association" in x.lower()):
+                payload = {"data": x}
+            else:
+                payload = {"alert": "Hmmm. Are you sure that is an NBA player?"}
+
             return jsonify(payload)
         except Exception as e:
             return(str(e))

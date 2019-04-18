@@ -5,13 +5,19 @@ class Highscore(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
-    total = db.Column(db.Integer)
-    date = db.Column(db.Date())
+    ppg = db.Column(db.Float)
+    rebounds = db.Column(db.Float)
+    assists = db.Column(db.Float)
+    per = db.Column(db.Float)
+    picture_url = db.Column(db.String())
 
-    def __init__(self, name, total, date):
+    def __init__(self, name, ppg, rebounds, assists, per, picture_url):
         self.name = name
-        self.total = total
-        self.date = date
+        self.ppg = ppg
+        self.rebounds = rebounds
+        self.assists = assists
+        self.per = per
+        self.picture_url = picture_url
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
@@ -20,6 +26,9 @@ class Highscore(db.Model):
         return {
             'id': self.id, 
             'name': self.name,
-            'total': self.total,
-            'date':self.date
+            'ppg': self.ppg,
+            'rebounds': self.rebounds,
+            'assists': self.assists,
+            'per': self.per,
+            'picture_url': self.picture_url
         }

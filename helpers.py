@@ -11,3 +11,4 @@ class Playersonly:
         self.url = url[-1][:5] + url[0][:2]
         self.name = self.name[:-1]
 
+

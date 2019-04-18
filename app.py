@@ -22,9 +22,9 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+subscription_key = os.environ['AZURE_KEY']
 
 from models import Highscore
-
 
 @app.route("/")
 def welcome():
@@ -32,64 +32,63 @@ def welcome():
 
 @app.route("/add")
 def add_event():
-    name=request.args.get('name')
-    total=request.args.get('total')
-    date=request.args.get('date')
     check = Playersonly()
-    check.name = name
+    check.name = request.args.get('name')
     check.formatName()
-    print(check.url)
     name = check.name
-    quote_page = f'https://www.basketball-reference.com/players/{check.url[0]}/{check.url}01.html'
-    print(quote_page)
-    page = urllib2.urlopen(quote_page)
-    soup = BeautifulSoup(page, 'html.parser')
-    career_stats = soup.find('div', attrs={'class': 'stats_pullout'})
-    check.ppg = career_stats.find_all('p')[5].text
-    check.rebounds = career_stats.find_all('p')[7].text
-    check.assists = career_stats.find_all('p')[9].text
-    check.per = career_stats.find_all('p')[19].text
-    print(check.name, check.ppg, check.rebounds, check.assists, check.per)
-    new_player = Highscore.query.filter_by(name=name).first()
-    # if new_player is None:
-    #     try:
-    #         highscore=Highscore(
-    #             name=name,
-    #             total=total,
-    #             date=date
-    #         )
-    #         subscription_key = os.environ['AZURE_KEY']
-    #         search_term = name
-    #         client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
-    #         client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
-    #         web_data = client.web.search(query=name)
-    #         image_results = client2.images.search(query=search_term)
-    #         class Object:
-    #             def toJSON(self):
-    #                 return json.dumps(self, default=lambda o: o.__dict__, 
-    #                     sort_keys=True, indent=4)
-    #         res = Object()
-    #         check = Object()
-    #         res.image = image_results.value
-    #         check.data = web_data
-    #         print(check.data.additional_properties)
-            # db.session.add(highscore)
-            # db.session.commit()
-        #     x = check.data.additional_properties['entities']['value'][0]['description']
-        #     y = res.image[0].content_url
-        #     if ("nba" in x.lower()) or ("national basketball association" in x.lower()):
-        #         payload = res.toJSON()
-        #     else:
-        #         payload = {"alert": "Hmmm. Are you sure that is an NBA player?"}
+    new_player = Highscore.query.filter_by(name = name).first()
+    if new_player is None:
+        try:
+            client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
+            web_data = client.web.search(query=name)
+            x = web_data.additional_properties['entities']['value'][0]['description']
+            print(x)
+            if ("nba" in x.lower()) or ("national basketball association" in x.lower()) or ("retired" in x.lower()):
+                quote_page = f'https://www.basketball-reference.com/players/{check.url[0]}/{check.url}01.html'
+                print(quote_page)
+                page = urllib2.urlopen(quote_page)
+                soup = BeautifulSoup(page, 'html.parser')
+                career_stats = soup.find('div', attrs={'class': 'stats_pullout'})
+                check.ppg = career_stats.find_all('p')[5].text
+                check.rebounds = career_stats.find_all('p')[7].text
+                check.assists = career_stats.find_all('p')[9].text
+                check.per = career_stats.find_all('p')[19].text
+                print(check.name, float(check.ppg), check.rebounds, check.assists, check.per)
+                highscore = Highscore(
+                    name = name,
+                    ppg = float(check.ppg),
+                    rebounds = float(check.rebounds),
+                    assists = float(check.assists),
+                    per = float(check.per),
+                    picture_url = ""
+                )
+                db.session.add(highscore)
+                db.session.commit()
+                payload = {"name": highscore.name, "ppg": highscore.ppg, "rebounds": highscore.rebounds, "assists": highscore.assists, "per": highscore.per}
+            else:
+                payload = {'error': 'Hmmm. Are you sure that is an NBA player?'}
 
-        #     print(x)
-        #     print(y)
-        #     return jsonify(payload)
-        # except Exception as e:
-        #     return(str(e))
-    # else:
-    #     error = {'error': 'that player is already registered'}
-    #     return jsonify(error)
+            return json.dumps(payload)
+        except Exception as e:
+            return(str(e))
+    else:
+        error = {'error': 'that player is already registered'}
+        return jsonify(error)
+
+@app.route("/pictures")
+def get_pics():
+    name = request.args.get('name')
+    res_list = []
+    player = Highscore.query.filter_by(name = name).first()
+    client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
+    image_results = client2.images.search(query=player.name)
+    image_list = image_results.value
+    for image in image_list:
+        res_list.append(image.content_url)
+    res = Object()
+    res.pics = res_list
+    payload = res.toJSON()
+    return jsonify(payload)
 
 @app.route("/getall")
 def get_all():

@@ -26,6 +26,11 @@ subscription_key = os.environ['AZURE_KEY']
 
 from models import Highscore
 
+class Object:
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
 @app.route("/")
 def welcome():
     return "Welcome to the nba highscore app server!"
@@ -81,7 +86,7 @@ def get_pics():
     res_list = []
     player = Highscore.query.filter_by(name = name).first()
     client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
-    image_results = client2.images.search(query=player.name)
+    image_results = client2.images.search(query=name)
     image_list = image_results.value
     for image in image_list:
         res_list.append(image.content_url)
@@ -89,6 +94,17 @@ def get_pics():
     res.pics = res_list
     payload = res.toJSON()
     return jsonify(payload)
+
+@app.route("/avatar", methods = ['POST'])
+def add_avatar():
+    name = request.args.get('name')
+    picture_url = request.args.get('picture_url')
+    player = Highscore.query.filter_by(name = name).first()
+    print(player.ppg)
+    player.picture_url = picture_url
+    db.session.commit()
+    return ""
+
 
 @app.route("/getall")
 def get_all():

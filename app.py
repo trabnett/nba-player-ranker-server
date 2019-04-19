@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
@@ -17,6 +18,7 @@ from msrest.authentication import CognitiveServicesCredentials
 
 
 app = Flask(__name__)
+CORS(app)
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -85,25 +87,33 @@ def get_pics():
     name = request.args.get('name')
     res_list = []
     player = Highscore.query.filter_by(name = name).first()
-    client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
-    image_results = client2.images.search(query=name)
-    image_list = image_results.value
-    for image in image_list:
-        res_list.append(image.content_url)
-    res = Object()
-    res.pics = res_list
-    payload = res.toJSON()
-    return jsonify(payload)
+    if player is None:
+        error = {'error': 'that player is not in the database'}
+        return jsonify(error)
+    else:
+        client2 = ImageSearchAPI(CognitiveServicesCredentials(subscription_key))
+        image_results = client2.images.search(query=name)
+        image_list = image_results.value
+        for image in image_list:
+            res_list.append(image.content_url)
+        res = Object()
+        res.pics = res_list
+        payload = res.toJSON()
+        return jsonify(payload)
 
 @app.route("/avatar", methods = ['POST'])
 def add_avatar():
     name = request.args.get('name')
     picture_url = request.args.get('picture_url')
     player = Highscore.query.filter_by(name = name).first()
-    print(player.ppg)
-    player.picture_url = picture_url
-    db.session.commit()
-    return ""
+    if player is None:
+        error = {'error': 'that player is not in the database'}
+        return jsonify(error)
+    else:
+        print(player.ppg)
+        player.picture_url = picture_url
+        db.session.commit()
+        return ""
 
 
 @app.route("/getall")

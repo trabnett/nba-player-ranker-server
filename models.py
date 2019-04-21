@@ -10,14 +10,16 @@ class Highscore(db.Model):
     assists = db.Column(db.Float)
     per = db.Column(db.Float)
     picture_url = db.Column(db.String())
+    rating = db.Column(db.Integer)
 
-    def __init__(self, name, ppg, rebounds, assists, per, picture_url):
+    def __init__(self, name, ppg, rebounds, assists, per, picture_url, rating):
         self.name = name
         self.ppg = ppg
         self.rebounds = rebounds
         self.assists = assists
         self.per = per
         self.picture_url = picture_url
+        self.rating = rating
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
@@ -30,5 +32,6 @@ class Highscore(db.Model):
             'rebounds': self.rebounds,
             'assists': self.assists,
             'per': self.per,
-            'picture_url': self.picture_url
+            'picture_url': self.picture_url,
+            'rating': self.rating
         }

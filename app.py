@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 from azure.cognitiveservices.search.imagesearch import ImageSearchAPI
+from azure.cognitiveservices.search.videosearch import VideoSearchAPI
 from azure.cognitiveservices.search.websearch import WebSearchAPI
 from azure.cognitiveservices.search.websearch.models import SafeSearch
 from msrest.authentication import CognitiveServicesCredentials
@@ -46,6 +47,7 @@ def add_event():
     new_player = Highscore.query.filter_by(name = name).first()
     if new_player is None:
         try:
+            print("!!!!!!!!!!!!")
             client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
             web_data = client.web.search(query=name)
             x = web_data.additional_properties['entities']['value'][0]['description']
@@ -67,7 +69,8 @@ def add_event():
                     rebounds = float(check.rebounds),
                     assists = float(check.assists),
                     per = float(check.per),
-                    picture_url = ""
+                    picture_url = "",
+                    rating = 15
                 )
                 db.session.add(highscore)
                 db.session.commit()
@@ -75,11 +78,13 @@ def add_event():
             else:
                 payload = {'error': 'Hmmm. Are you sure that is an NBA player?'}
 
-            return json.dumps(payload)
+            return jsonify(payload)
         except Exception as e:
-            return(str(e))
+            print(str(e))
+            return jsonify(str(e))
     else:
         error = {'error': 'that player is already registered'}
+        print("here")
         return jsonify(error)
 
 @app.route("/pictures")
@@ -115,6 +120,32 @@ def add_avatar():
         db.session.commit()
         return ""
 
+@app.route("/videos")
+def get_videos():
+    name = request.args.get('name') + " best plays"
+    res_list = []
+    client3 = VideoSearchAPI(CognitiveServicesCredentials(subscription_key))
+    video_results = client3.videos.search(query=name)
+    videos_list = video_results.value
+    for video in videos_list:
+        res_list.append(video.content_url)
+    res = Object()
+    res.videos = res_list
+    payload = res.toJSON()
+    return jsonify(payload)
+
+@app.route("/rating", methods = ['POST'])
+def update_rating():
+    name = request.args.get('name')
+    rating = request.args.get('rating')
+    player = Highscore.query.filter_by(name = name).first()
+    if player is None:
+        error = {'error': 'that player is not in the database'}
+        return jsonify(error)
+    else:
+        player.rating = rating
+        db.session.commit()
+        return ""
 
 @app.route("/getall")
 def get_all():

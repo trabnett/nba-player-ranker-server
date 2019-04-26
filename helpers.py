@@ -1,3 +1,6 @@
+import json
+import os
+
 class Playersonly:
     def formatName(self):
         names = self.name.split(" ")
@@ -13,5 +16,11 @@ class Playersonly:
 
         self.url = url[-1][:5] + url[0][:2]
         self.name = self.name[:-1]
+
+class Object:
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
 
 

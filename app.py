@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
-from helpers import Playersonly
+from helpers import Playersonly, Object
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -29,11 +29,6 @@ subscription_key = os.environ['AZURE_KEY']
 
 from models import Highscore
 
-class Object:
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
 @app.route("/")
 def welcome():
     return "Welcome to the nba highscore app server!"
@@ -47,7 +42,6 @@ def add_event():
     new_player = Highscore.query.filter_by(name = name).first()
     if new_player is None:
         try:
-            print("!!!!!!!!!!!!")
             client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
             web_data = client.web.search(query=name)
             x = web_data.additional_properties['entities']['value'][0]['description']
@@ -58,23 +52,27 @@ def add_event():
                 page = urllib2.urlopen(quote_page)
                 soup = BeautifulSoup(page, 'html.parser')
                 career_stats = soup.find('div', attrs={'class': 'stats_pullout'})
-                check.ppg = career_stats.find_all('p')[5].text
-                check.rebounds = career_stats.find_all('p')[7].text
-                check.assists = career_stats.find_all('p')[9].text
-                check.per = career_stats.find_all('p')[19].text
-                print(check.name, float(check.ppg), check.rebounds, check.assists, check.per)
-                highscore = Highscore(
-                    name = name,
-                    ppg = float(check.ppg),
-                    rebounds = float(check.rebounds),
-                    assists = float(check.assists),
-                    per = float(check.per),
-                    picture_url = "",
-                    rating = 15
-                )
-                db.session.add(highscore)
-                db.session.commit()
-                payload = {"name": highscore.name, "ppg": highscore.ppg, "rebounds": highscore.rebounds, "assists": highscore.assists, "per": highscore.per}
+                if career_stats is None:
+                    payload = {'error': 'There is no basketball reference page for that player. Is it possible that you made a spelling mistake or are using a nickname? For instance, if you want Metta World Peace, search for Ron Artest'}
+                    return jsonify(payload)
+                else:
+                    check.ppg = career_stats.find_all('p')[5].text
+                    check.rebounds = career_stats.find_all('p')[7].text
+                    check.assists = career_stats.find_all('p')[9].text
+                    check.per = career_stats.find_all('p')[19].text
+                    print(check.name, float(check.ppg), check.rebounds, check.assists, check.per)
+                    highscore = Highscore(
+                        name = name,
+                        ppg = float(check.ppg),
+                        rebounds = float(check.rebounds),
+                        assists = float(check.assists),
+                        per = float(check.per),
+                        picture_url = "",
+                        rating = 15
+                    )
+                    db.session.add(highscore)
+                    db.session.commit()
+                    payload = {"name": highscore.name, "ppg": highscore.ppg, "rebounds": highscore.rebounds, "assists": highscore.assists, "per": highscore.per}
             else:
                 payload = {'error': 'Hmmm. Are you sure that is an NBA player?'}
 
@@ -84,7 +82,6 @@ def add_event():
             return jsonify(str(e))
     else:
         error = {'error': 'that player is already registered'}
-        print("here")
         return jsonify(error)
 
 @app.route("/pictures")
@@ -154,4 +151,8 @@ def get_all():
         return  jsonify([e.serialize() for e in highscores])
     except Exception as e:
 	    return(str(e))
+
+@app.route("/get_my_ip", methods=["GET"])
+def get_my_ip():
+    return jsonify({'ip': request.environ['REMOTE_ADDR']}), 200
 

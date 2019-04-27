@@ -13,6 +13,7 @@ server is hosted on heroku at:
 + Flask
 + Microsoft Azure
 + Beautiful Soup
++ Postgres
 
 #### Quick Start
 1. Clone the repo
@@ -34,7 +35,11 @@ $ source venv/bin/activate
 ``
 $ pip install -r requirements.txt
 ``
-4. Run the development server  
+4. Migrage db
+``
+flask db migrate -m "highscore"
+``
+5. Run the development server  
 ``
 flask run
 ``

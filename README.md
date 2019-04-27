@@ -4,6 +4,7 @@ Server for a simple onepage react app that lets users rank their favorite NBA pl
 
 webapp is hosted on heroku at:
 [NBA Player Ranker webapp](https://nba-player-ranker.herokuapp.com/)
+
 code for webapp at:
 [NBA Player Ranker webapp code:](https://github.com/trabnett/nba_player_ranker_webapp)
 

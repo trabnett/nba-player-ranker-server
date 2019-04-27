@@ -5,12 +5,13 @@ class Highscore(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
-    ppg = db.Column(db.Float)
-    rebounds = db.Column(db.Float)
-    assists = db.Column(db.Float)
-    per = db.Column(db.Float)
+    ppg = db.Column(db.Float())
+    rebounds = db.Column(db.Float())
+    assists = db.Column(db.Float())
+    per = db.Column(db.Float())
     picture_url = db.Column(db.String())
     rating = db.Column(db.Integer)
+
 
     def __init__(self, name, ppg, rebounds, assists, per, picture_url, rating):
         self.name = name

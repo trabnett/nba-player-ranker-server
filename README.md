@@ -11,12 +11,15 @@ code for webapp at:
 server is hosted on heroku at:
 [NBA Player Ranker server](https://player-ranker-server.herokuapp.com/)
 
-#### employs:
+#### Dependencies:
 
 + Flask
 + Microsoft Azure
-+ Beautiful Soup
++ Beautifulsoup4
 + Postgres
++ SQLAlchemy
++ Flask-Cors
++ Gunicorn
 
 #### Quick Start
 1. Clone the repo  

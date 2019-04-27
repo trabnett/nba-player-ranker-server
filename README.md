@@ -1,6 +1,6 @@
 # nba-player-ranker-server
 
-Server for a simple onepage react app that lets users rank their favorite NBA players. Uses Microsoft Azure to search for relevant player data, pictures and videos. Uses BeautifulSoup to scrape data from Basketball Reference. Uses Postgres for data storage.
+Server for a simple onepage React app that lets users rank their favorite NBA players. Uses Microsoft Azure to search for relevant player data, pictures and videos. Uses BeautifulSoup to scrape data from Basketball Reference. Uses Postgres for data storage.
 
 webapp is hosted on heroku at:
 [NBA Player Ranker webapp](https://nba-player-ranker.herokuapp.com/)

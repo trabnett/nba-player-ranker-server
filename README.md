@@ -19,7 +19,7 @@ server is hosted on heroku at:
 + Postgres
 
 #### Quick Start
-1. Clone the repo
+1. Clone the repo  
 ``
  $ git clone https://github.com/trabnett/nba-player-ranker-server
 ``  
@@ -27,18 +27,18 @@ server is hosted on heroku at:
  $ cd nba-player-ranker-server
 ``
 
-2. Initialize and activate a virtualenv
+2. Initialize and activate a virtualenv  
 ``
 $ virtualenv venv
 ``
 ``
 $ source venv/bin/activate
 ``
-3. Install dependencies
+3. Install dependencies  
 ``
 $ pip install -r requirements.txt
 ``
-4. Migrage db
+4. Migrage db  
 ``
 flask db migrate -m "highscore"
 ``

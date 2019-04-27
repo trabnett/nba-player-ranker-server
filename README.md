@@ -1,7 +1,7 @@
 # nba-player-ranker-server
 python/flask server for nba player ranker app w/ azure, beautifulsoup and postgres
 
-hello . everyone
+hello  everyone
 
 
 #### Quick Start

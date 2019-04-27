@@ -30,7 +30,7 @@ server is hosted on heroku at:
 2. Initialize and activate a virtualenv  
 ``
 $ virtualenv venv
-``
+``  
 ``
 $ source venv/bin/activate
 ``

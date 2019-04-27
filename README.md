@@ -6,7 +6,7 @@ webapp is hosted on heroku at:
 [NBA Player Ranker webapp](https://nba-player-ranker.herokuapp.com/)
 
 code for webapp at:
-[NBA Player Ranker webapp code:](https://github.com/trabnett/nba_player_ranker_webapp)
+[NBA Player Ranker webapp code](https://github.com/trabnett/nba_player_ranker_webapp)
 
 server is hosted on heroku at:
 [NBA Player Ranker server](https://player-ranker-server.herokuapp.com/)

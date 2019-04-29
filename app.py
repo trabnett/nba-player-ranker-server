@@ -9,6 +9,7 @@ try:
 except ImportError:
     import urllib2
 from bs4 import BeautifulSoup
+import urllib.request
 import socket
 import json
 import os
@@ -158,6 +159,7 @@ def get_my_ip():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
     ip = request.environ['REMOTE_ADDR']
-    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip}
+    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip, 'external_ip': external_ip}
     return jsonify(x)
 

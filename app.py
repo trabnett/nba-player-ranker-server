@@ -8,6 +8,7 @@ try:
     import urllib.request as urllib2
 except ImportError:
     import urllib2
+from requests import get
 from bs4 import BeautifulSoup
 import urllib.request
 import socket
@@ -18,6 +19,7 @@ from azure.cognitiveservices.search.videosearch import VideoSearchAPI
 from azure.cognitiveservices.search.websearch import WebSearchAPI
 from azure.cognitiveservices.search.websearch.models import SafeSearch
 from msrest.authentication import CognitiveServicesCredentials
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -29,7 +31,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 subscription_key = os.environ['AZURE_KEY']
 
-from models import Highscore
+from models import Highscore, IP
 
 @app.route("/")
 def welcome():
@@ -156,11 +158,13 @@ def get_all():
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
-    ip = request.environ['REMOTE_ADDR']
-    req = request.remote_addr
-    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
-    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip, 'external_ip': external_ip, 'req': req}
-    return jsonify(x)
+    ip = request.args.get('ip')
+    user = IP.query.filter_by(ip_address = ip).first()
+    if user is None:
+        res = IP(ip_address= ip, count= 1)
+        db.session.add(res)
+        db.session.commit()
+        res = {'count': 1, 'timeStamp': res.timestamp}
+    res = {'ip': ip}
+    return jsonify(res)
 

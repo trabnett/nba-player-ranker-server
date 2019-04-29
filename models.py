@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 class Highscore(db.Model):
     __tablename__ = 'highscore'
@@ -36,3 +37,14 @@ class Highscore(db.Model):
             'picture_url': self.picture_url,
             'rating': self.rating
         }
+    
+class IP(db.Model):
+    __tablename__ = 'IP'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    count = db.Column(db.Integer)
+
+def __repr__(self):
+    return '<IP {}>'.format(self.body)

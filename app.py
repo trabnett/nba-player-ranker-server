@@ -9,6 +9,7 @@ try:
 except ImportError:
     import urllib2
 from bs4 import BeautifulSoup
+import socket
 import json
 import os
 from azure.cognitiveservices.search.imagesearch import ImageSearchAPI
@@ -154,5 +155,9 @@ def get_all():
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
-    return jsonify({'ip': request.environ['REMOTE_ADDR']}), 200
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    ip = request.environ['REMOTE_ADDR']
+    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip}
+    return jsonify(x)
 

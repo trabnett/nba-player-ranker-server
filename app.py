@@ -159,7 +159,8 @@ def get_my_ip():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
     ip = request.environ['REMOTE_ADDR']
+    req = request.remote_addr
     external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
-    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip, 'external_ip': external_ip}
+    x = {'hostname': hostname, 'IPAddr': IPAddr, 'ip': ip, 'external_ip': external_ip, 'req': req}
     return jsonify(x)
 

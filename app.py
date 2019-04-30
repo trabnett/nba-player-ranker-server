@@ -20,6 +20,7 @@ from azure.cognitiveservices.search.websearch import WebSearchAPI
 from azure.cognitiveservices.search.websearch.models import SafeSearch
 from msrest.authentication import CognitiveServicesCredentials
 from datetime import datetime
+import time
 
 
 app = Flask(__name__)
@@ -159,12 +160,35 @@ def get_all():
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
     ip = request.args.get('ip')
+    name = request.args.get('name')
+    rating = request.args.get('rating')
+    print(ip, name, rating)
     user = IP.query.filter_by(ip_address = ip).first()
     if user is None:
         res = IP(ip_address= ip, count= 1)
         db.session.add(res)
         db.session.commit()
         res = {'count': 1, 'timeStamp': res.timestamp}
-    res = {'ip': ip}
-    return jsonify(res)
+        return jsonify(res)
+    else:
+        if user.count == 2:
+            x = int(time.time())
+            lockout = x - user.timestamp
+            if lockout > 300:
+                user.timestamp = int(time.time())
+                user.count = 1
+                db.session.add(user)
+                db.session.commit()
+                res = {'count': user.count, 'timestamp': user.timestamp}
+                return jsonify(res)
+            else:
+                res = {'count': 2, 'lockout': lockout}
+                return jsonify(res)
+        else:
+            user.count = 2
+            db.session.add(user)
+            db.session.commit()
+            res = {'count': user.count, 'timestamp': user.timestamp}
+            return jsonify(res)
+
 

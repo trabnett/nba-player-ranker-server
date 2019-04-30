@@ -160,15 +160,12 @@ def get_all():
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
     ip = request.args.get('ip')
-    name = request.args.get('name')
-    rating = request.args.get('rating')
-    print(ip, name, rating)
     user = IP.query.filter_by(ip_address = ip).first()
     if user is None:
         res = IP(ip_address= ip, count= 1)
         db.session.add(res)
         db.session.commit()
-        res = {'count': 1, 'timeStamp': res.timestamp}
+        res = {'count': res.count, 'timeStamp': res.timestamp}
         return jsonify(res)
     else:
         if user.count == 2:

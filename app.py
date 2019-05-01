@@ -50,10 +50,8 @@ def add_event():
             client = WebSearchAPI(CognitiveServicesCredentials(subscription_key))
             web_data = client.web.search(query=name)
             x = web_data.additional_properties['entities']['value'][0]['description']
-            print(x)
             if ("nba" in x.lower()) or ("national basketball association" in x.lower()) or ("retired" in x.lower()):
                 quote_page = f'https://www.basketball-reference.com/players/{check.url[0]}/{check.url}01.html'
-                print(quote_page)
                 page = urllib2.urlopen(quote_page)
                 soup = BeautifulSoup(page, 'html.parser')
                 career_stats = soup.find('div', attrs={'class': 'stats_pullout'})
@@ -65,7 +63,6 @@ def add_event():
                     check.rebounds = career_stats.find_all('p')[7].text
                     check.assists = career_stats.find_all('p')[9].text
                     check.per = career_stats.find_all('p')[19].text
-                    print(check.name, float(check.ppg), check.rebounds, check.assists, check.per)
                     highscore = Highscore(
                         name = name,
                         ppg = float(check.ppg),
@@ -117,7 +114,6 @@ def add_avatar():
         error = {'error': 'that player is not in the database'}
         return jsonify(error)
     else:
-        print(player.ppg)
         player.picture_url = picture_url
         db.session.commit()
         return ""

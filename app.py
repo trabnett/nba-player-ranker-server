@@ -155,8 +155,12 @@ def get_all():
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
+    bypass = request.args.get('bypass')
     ip = request.args.get('ip')
     user = IP.query.filter_by(ip_address = ip).first()
+    if bypass:
+        res = {'count': user.count, 'timestamp': user.timestamp}
+        return jsonify(res)
     if user is None:
         res = IP(ip_address= ip, count= 1)
         db.session.add(res)
@@ -164,9 +168,23 @@ def get_my_ip():
         res = {'count': res.count, 'timeStamp': res.timestamp}
         return jsonify(res)
     else:
-        if user.count == 2:
-            x = int(time.time())
-            lockout = x - user.timestamp
+        x = int(time.time())
+        lockout = x - user.timestamp
+        if user.count == 1 and lockout > 300:
+            print('there')
+            user.timestamp = int(time.time())
+            db.session.add(user)
+            db.session.commit()
+            res = {'count': user.count, 'timestamp': user.timestamp}
+            return jsonify(res)
+        elif user.count == 1 and lockout < 300:
+            print("here")
+            user.count = 2
+            db.session.add(user)
+            db.session.commit()
+            res = {'count': user.count, 'timestamp': user.timestamp}
+            return jsonify(res)
+        elif user.count == 2:
             if lockout > 300:
                 user.timestamp = int(time.time())
                 user.count = 1

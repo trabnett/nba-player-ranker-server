@@ -44,7 +44,7 @@ class IP(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     ip_address = db.Column(db.String(140))
-    timestamp = db.Column(db.Integer, index=True, default=int(time.time()))
+    timestamp = db.Column(db.Integer, default=int(time.time()))
     count = db.Column(db.Integer)
 
 def __repr__(self):

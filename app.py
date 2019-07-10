@@ -202,4 +202,29 @@ def get_my_ip():
             res = {'count': user.count, 'timestamp': user.timestamp}
             return jsonify(res)
 
+# route for fast checking and deleting specific players. 
+@app.route('/delete/<int:id>', methods=['GET', 'POST'])
+def delete(id):
+    if request.method == 'GET':
+        res = {}
+        players = db.session.query(Highscore).all()
+        for player in players:
+            res[player.id] = player.name
+        return jsonify(res)
+    player = Highscore.query.get(id)
+    if player == None:
+        return 'there is no player with this id'
+    else:
+        string = f'{player.name} has been deleted'
+        db.session.delete(player)
+        db.session.commit()
+        return string
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return 'This route does not exist. To see a list of all players on the db, go to:\n    https://player-ranker-server.herokuapp.com/delete/1'
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return 'Internal Server Error'
